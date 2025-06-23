@@ -18,6 +18,7 @@
             --glow-ciencia-ficcion: rgba(139, 92, 246, 0.5); /* Violet */
             --glow-fantasia: rgba(16, 185, 129, 0.5); /* Emerald */
             --glow-comics: rgba(239, 68, 68, 0.5); /* Red */
+            --glow-amor: rgba(251, 146, 60, 0.5); /* Orange for love */
             --glow-default: rgba(255, 255, 255, 0.1);
         }
         body { font-family: 'Nunito', sans-serif; background-color: #000000; color: #E0E0E0; overflow-x: hidden; }
@@ -35,12 +36,16 @@
         .book-card[data-category="ciencia-ficcion"] { --glow-color: var(--glow-ciencia-ficcion); }
         .book-card[data-category="fantasia"] { --glow-color: var(--glow-fantasia); }
         .book-card[data-category="comics"] { --glow-color: var(--glow-comics); }
+        .book-card[data-category="amor"] { --glow-color: var(--glow-amor); }
         .hidden-item { opacity: 0; pointer-events: none; }
         .visible-item { opacity: 1; pointer-events: auto; }
         .filter-btn { transition: all 0.3s ease; }
         .filter-btn.active { background-color: #2563EB; color: #FFFFFF; transform: scale(1.05); box-shadow: 0 0 15px rgba(37, 99, 235, 0.5); }
         .modal { transition: opacity 0.3s ease; }
         .modal-content { transition: transform 0.3s ease, opacity 0.3s ease; }
+        /* Estilo para las palabras secretas */
+        .secret-word { cursor: pointer; transition: color 0.3s ease; }
+        .secret-word:hover { color: #FBBF24; }
     </style>
 </head>
 <body class="bg-black">
@@ -59,7 +64,7 @@
             <button class="filter-btn fade-in-item bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold py-2 px-5 rounded-full" data-filter="clasico">Clásicos</button>
             <button class="filter-btn fade-in-item bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold py-2 px-5 rounded-full" data-filter="ciencia-ficcion">Ciencia Ficción</button>
             <button class="filter-btn fade-in-item bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold py-2 px-5 rounded-full" data-filter="fantasia">Fantasía</button>
-            <!-- El botón de Cómics se añadirá aquí dinámicamente -->
+            <!-- Botones secretos se añadirán aquí -->
         </div>
         <main id="book-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
             <!-- Los libros se insertarán aquí -->
@@ -76,9 +81,9 @@
             <h2 id="credits-title" class="text-3xl font-bold text-white mb-4">Créditos</h2>
             <div id="credits-text-content" class="text-gray-300 space-y-3">
                 <p>Diseñado y desarrollado por:</p>
-                <p class="font-bold text-xl text-blue-400">[Tu Nombre o Nombre del Equipo]</p>
-                <p>Con la asistencia de IA por Gemini.</p>
-                <p class="text-xs text-gray-500 mt-6">&copy; 2025 - Todos los derechos reservados.</p>
+                <p class="font-bold text-xl text-blue-400">André Isaac Ruiz Ramírez y Nicole Jazlyn Reyes Rivera</p>
+                <!-- CAMBIO: Se envuelven las palabras secretas en spans -->
+                <p>Hecho con mucho <span id="word-cariño" class="secret-word">cariño</span> y <span id="word-amor" class="secret-word">amor</span>.</p>
             </div>
             <button id="close-credits-btn" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"><i class='bx bx-x text-3xl'></i></button>
         </div>
@@ -94,7 +99,7 @@
                 <h3 class="text-xl font-bold text-white mb-3">Sinopsis</h3>
                 <p id="modal-book-synopsis" class="text-gray-300 leading-relaxed mb-8 flex-grow"></p>
                 <a id="modal-read-btn" href="#" target="_blank" class="mt-auto text-center bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300">
-                    Leer Libro <i class='bx bx-book-reader ml-2'></i>
+                    <!-- Texto dinámico -->
                 </a>
             </div>
             <button id="close-book-modal-btn" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"><i class='bx bx-x text-3xl'></i></button>
@@ -116,14 +121,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- DATOS DE LOS LIBROS ---
     const booksData = [
-        { href: "#", category: "clasico", img: "images/DonQuijoteDelamancha.png", title: "Don Quijote de la Mancha", author: "Miguel de Cervantes", synopsis: "Las aventuras de un hidalgo de La Mancha que, tras leer demasiados libros de caballerías, decide convertirse en un caballero andante para deshacer entuertos y buscar su propia gloria." },
-        { href: "#", category: "ciencia-ficcion", img: "https://placehold.co/400x600/8B5CF6/FFFFFF?text=1984", title: "1984", author: "George Orwell", synopsis: "En un futuro distópico, el estado totalitario controla cada aspecto de la vida. Winston Smith, un trabajador desilusionado, comienza a cuestionar el sistema y al omnipresente Gran Hermano." },
-        { href: "#", category: "fantasia", img: "https://placehold.co/400x600/10B981/FFFFFF?text=El+Alquimista", title: "El Alquimista", author: "Paulo Coelho", synopsis: "Un joven pastor andaluz llamado Santiago emprende un viaje en busca de un tesoro, descubriendo en el camino la importancia de seguir sus sueños y escuchar a su corazón." },
-        { href: "#", category: "clasico", img: "https://placehold.co/400x600/EC4899/FFFFFF?text=El+Arte+de+la+Guerra", title: "El Arte de la Guerra", author: "Sun Tzu", synopsis: "Un antiguo tratado militar chino que ofrece estrategias y tácticas sobre cómo afrontar conflictos y ganar batallas, aplicable no solo a la guerra, sino también a los negocios y la vida cotidiana." },
-        { href: "#", category: "fantasia", img: "https://placehold.co/400x600/10B981/FFFFFF?text=El+Hobbit", title: "El Hobbit", author: "J.R.R. Tolkien", synopsis: "Bilbo Bolsón, un hobbit amante de la comodidad, es arrastrado a una aventura inesperada con un grupo de enanos para recuperar un tesoro robado por el dragón Smaug." },
-        { href: "#", category: "ciencia-ficcion", img: "https://placehold.co/400x600/8B5CF6/FFFFFF?text=Dune", title: "Dune", author: "Frank Herbert", synopsis: "En el desértico planeta Arrakis, el joven Paul Atreides debe navegar intrigas políticas, religiosas y ecológicas para proteger el recurso más valioso del universo: la especia melange." },
-        { href: "#", category: "comics", img: "https://placehold.co/400x600/EF4444/FFFFFF?text=Watchmen", title: "Watchmen", author: "Alan Moore", synopsis: "Una deconstrucción del género de superhéroes que explora las complejidades morales de un grupo de justicieros retirados en una historia alternativa durante la Guerra Fría." },
-        { href: "#", category: "comics", img: "https://placehold.co/400x600/EF4444/FFFFFF?text=The+Sandman", title: "The Sandman", author: "Neil Gaiman", synopsis: "Sueño, el rey de las historias, es capturado y debe viajar a través de diferentes reinos para recuperar sus artefactos perdidos y restaurar su poder." }
+        { href: "https://docs.google.com/file/d/0B1-iBzAARGMIT2lwMGQzWVZRX28/edit?resourcekey=0-q6QqougVW5OlNNrC5oNxig", category: "clasico", img: "https://i.imgur.com/o4xkah9.jpeg", title: "Don Quijote de la Mancha", author: "Miguel de Cervantes", synopsis: "Las aventuras de un hidalgo de La Mancha que, tras leer demasiados libros de caballerías, decide convertirse en un caballero andante para deshacer entuertos y buscar su propia gloria." },
+        { href: "https://drive.google.com/file/d/0B5BInuWu1__rSDZPUW1Dd0tqUUU/edit?resourcekey=0-S0Owgl2UJdeL46gXLkaaww", category: "ciencia-ficcion", img: "https://i.imgur.com/AJAYOm9.jpeg", title: "1984", author: "George Orwell", synopsis: "En un futuro distópico, el estado totalitario controla cada aspecto de la vida. Winston Smith, un trabajador desilusionado, comienza a cuestionar el sistema y al omnipresente Gran Hermano." },
+        { href: "https://drive.google.com/file/d/18J1RirPdXvm9pjH8VkxxbztUtrP0-rqA/edit?calcdoggdesrgol=percpobelna", category: "fantasia", img: "https://i.imgur.com/Uwab4qI.jpeg", title: "El Alquimista", author: "Paulo Coelho", synopsis: "Un joven pastor andaluz llamado Santiago emprende un viaje en busca de un tesoro, descubriendo en el camino la importancia de seguir sus sueños y escuchar a su corazón." },
+        { href: "https://drive.google.com/file/d/0B_0AdhL2jjUjZ2pic2VyOHNfMkE/edit?resourcekey=0--QU_c-dxJwoIgKW9JiLAEQ", category: "clasico", img: "https://i.imgur.com/PT1ufBj.jpeg", title: "El Arte de la Guerra", author: "Sun Tzu", synopsis: "Un antiguo tratado militar chino que ofrece estrategias y tácticas sobre cómo afrontar conflictos y ganar batallas, aplicable no solo a la guerra, sino también a los negocios y la vida cotidiana." },
+        { href: "https://drive.google.com/file/d/1j4s2JjzNXRTXTXuWQRVTu__U-eO10A2v/edit", category: "fantasia", img: "https://i.imgur.com/DUapgpe.jpeg", title: "El Hobbit", author: "J.R.R. Tolkien", synopsis: "Bilbo Bolsón, un hobbit amante de la comodidad, es arrastrado a una aventura inesperada con un grupo de enanos para recuperar un tesoro robado por el dragón Smaug." },
+        { href: "https://elretratodelalectura.wordpress.com/wp-content/uploads/2014/11/i-dune-de-frank-herbert-r1-3.pdf", category: "ciencia-ficcion", img: "https://i.imgur.com/PjQN6ms.jpeg", title: "Dune", author: "Frank Herbert", synopsis: "En el desértico planeta Arrakis, el joven Paul Atreides debe navegar intrigas políticas, religiosas y ecológicas para proteger el recurso más valioso del universo: la especia melange." },
+        { href: "https://drive.google.com/file/d/1E0t8KhMOleQdIchJmYjgaDeOvuqNRP4Q/view", category: "comics", img: "https://i.imgur.com/8i1jybe.jpeg", title: "Hellboy", author: "Mike Mignola & John Byrne", synopsis: "Hellboy, una criatura demoníaca invocada por los nazis durante la Segunda Guerra Mundial, es rescatado por las fuerzas aliadas y criado por el Profesor Trevor Bruttenholm como parte del Buró de Investigación y Defensa Paranormal (B.P.R.D.). Ya adulto, Hellboy investiga extraños sucesos sobrenaturales que lo llevan a enfrentarse con el misterioso regreso de Rasputín, quien busca completar la misión original de invocar fuerzas oscuras para destruir el mundo... y Hellboy es clave en ese plan." },
+        { href: "https://drive.google.com/file/d/1ceH9uqqRUCX8J3uICoZkAO5ZRqgoJvRr/view", category: "comics", img: "https://i.imgur.com/mvwrolM.jpeg", title: "Sandman", author: "Neil Gaiman", synopsis: "Morfeo, el dios del sueño, escapa tras décadas de encierro y debe reconstruir su reino mientras enfrenta dioses, demonios y sus propios errores." },
+        { href: "https://drive.google.com/file/d/0B3WJqJZKobwbYk0xRG1LUTF5bjA/edit?resourcekey=0-SopEGgedc1yEMVpFT835LQ", category: "amor", img: "https://i.imgur.com/wMd0mGD.jpeg", title: "Orgullo y Prejuicio", author: "Jane Austen", synopsis: "Una de las primeras comedias románticas en la historia de la novela, narra las peripecias de las cinco hermanas Bennet en la Inglaterra georgiana, y cómo enfrentan el amor, los escándalos y el clasismo."}
     ];
 
     const headerContainer = document.getElementById('header-container');
@@ -131,18 +137,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookGrid = document.getElementById('book-grid');
     const filterContainer = document.getElementById('filter-container');
     
-    // CAMBIO: Lógica de renderizado simplificada
     function renderBooks(filter = 'all') {
         bookGrid.innerHTML = '';
         let booksToRender;
 
         if (filter === 'all') {
-            // Si 'Todos' está seleccionado, muestra todos los libros excepto los cómics, a menos que estén desbloqueados.
-            booksToRender = easterEggUnlocked 
-                ? booksData 
-                : booksData.filter(book => book.category !== 'comics');
+            booksToRender = booksData.filter(book => {
+                if (book.category === 'comics' && !comicsEasterEggUnlocked) return false;
+                if (book.category === 'amor' && !loveEasterEggUnlocked) return false;
+                return true;
+            });
         } else {
-            // Si se selecciona una categoría específica, muestra solo los libros de esa categoría.
             booksToRender = booksData.filter(book => book.category === filter);
         }
 
@@ -165,46 +170,57 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookDetailsModal = document.getElementById('book-details-modal');
     const closeBookModalBtn = document.getElementById('close-book-modal-btn');
     
-    function openModal(modal) { /* ... (código sin cambios) ... */ modal.classList.remove('hidden-item'); modal.classList.add('visible-item'); setTimeout(() => { modal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0'); }, 10); }
-    function closeModal(modal) { /* ... (código sin cambios) ... */ modal.querySelector('.modal-content').classList.add('scale-95', 'opacity-0'); setTimeout(() => { modal.classList.add('hidden-item'); modal.classList.remove('visible-item'); }, 300); }
+    function openModal(modal) { modal.classList.remove('hidden-item'); modal.classList.add('visible-item'); setTimeout(() => { modal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0'); }, 10); }
+    function closeModal(modal) { modal.querySelector('.modal-content').classList.add('scale-95', 'opacity-0'); setTimeout(() => { modal.classList.add('hidden-item'); modal.classList.remove('visible-item'); }, 300); }
     
     closeCreditsBtn.addEventListener('click', () => closeModal(creditsModal));
     creditsModal.addEventListener('click', e => e.target === creditsModal && closeModal(creditsModal));
     closeBookModalBtn.addEventListener('click', () => closeModal(bookDetailsModal));
     bookDetailsModal.addEventListener('click', e => e.target === bookDetailsModal && closeModal(bookDetailsModal));
     
-    bookGrid.addEventListener('click', (event) => { /* ... (código sin cambios) ... */ const card = event.target.closest('.book-card'); if (!card) return; const data = card.dataset; document.getElementById('modal-book-img').src = data.img; document.getElementById('modal-book-title').textContent = data.title; document.getElementById('modal-book-author').textContent = data.author; document.getElementById('modal-book-synopsis').textContent = data.synopsis; document.getElementById('modal-read-btn').href = data.href; openModal(bookDetailsModal); });
+    bookGrid.addEventListener('click', (event) => {
+        const card = event.target.closest('.book-card');
+        if (!card) return;
+        const data = card.dataset;
+        const readButton = document.getElementById('modal-read-btn');
+        document.getElementById('modal-book-img').src = data.img;
+        document.getElementById('modal-book-title').textContent = data.title;
+        document.getElementById('modal-book-author').textContent = data.author;
+        document.getElementById('modal-book-synopsis').textContent = data.synopsis;
+        readButton.href = data.href;
+        if (data.category === 'comics') { readButton.innerHTML = "Leer Cómic <i class='bx bxs-file-blank ml-2'></i>"; }
+        else { readButton.innerHTML = "Leer Libro <i class='bx bx-book-reader ml-2'></i>"; }
+        openModal(bookDetailsModal);
+    });
 
     // --- LÓGICA DE EASTER EGGS ---
     let creditsClickCount = 0;
     let titleClickCount = 0;
-    let easterEggUnlocked = false;
+    let comicsEasterEggUnlocked = false;
+    let loveEasterEggUnlocked = false;
+    let loveClickSequence = [];
     const originalCreditsHTML = creditsTextContent.innerHTML;
 
     creditsBtn.addEventListener('click', () => {
-        // CAMBIO: La lógica del easter egg solo se ejecuta si la categoría NO ha sido desbloqueada.
-        if (!easterEggUnlocked) {
+        if (!comicsEasterEggUnlocked) {
             creditsClickCount++;
             if (creditsClickCount === 3) {
                 creditsTextContent.innerHTML = `<p class="font-bold text-xl text-amber-400">Deberías clickear 10 veces el título 👀</p>`;
             } else {
                 creditsTextContent.innerHTML = originalCreditsHTML;
-                if (creditsClickCount > 3) {
-                    creditsClickCount = 0;
-                }
+                if (creditsClickCount > 3) creditsClickCount = 0;
             }
         } else {
-            // Si ya está desbloqueado, siempre muestra el contenido original.
             creditsTextContent.innerHTML = originalCreditsHTML;
         }
         openModal(creditsModal);
     });
 
     headerContainer.addEventListener('click', () => {
-        if (easterEggUnlocked) return;
+        if (comicsEasterEggUnlocked) return;
         titleClickCount++;
         if (titleClickCount >= 10) {
-            easterEggUnlocked = true;
+            comicsEasterEggUnlocked = true;
             const comicsButton = document.createElement('button');
             comicsButton.className = "filter-btn fade-in-item bg-red-800 hover:bg-red-700 text-gray-300 font-bold py-2 px-5 rounded-full";
             comicsButton.dataset.filter = "comics";
@@ -213,6 +229,34 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => comicsButton.classList.add('is-visible'), 50);
         }
     });
+    
+    // CAMBIO: Lógica para el easter egg de Amor
+    creditsTextContent.addEventListener('click', (event) => {
+        if (loveEasterEggUnlocked || !event.target.matches('.secret-word')) return;
+        
+        loveClickSequence.push(event.target.id);
+        
+        // Si se hace clic en la secuencia correcta
+        if (loveClickSequence.join(',') === 'word-cariño,word-amor') {
+            loveEasterEggUnlocked = true;
+            const loveButton = document.createElement('button');
+            loveButton.className = "filter-btn fade-in-item bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-5 rounded-full";
+            loveButton.dataset.filter = "amor";
+            loveButton.textContent = "Amor";
+            filterContainer.appendChild(loveButton);
+            setTimeout(() => loveButton.classList.add('is-visible'), 50);
+
+            // Una vez desbloqueado, ya no se puede volver a activar
+            const secretWords = document.querySelectorAll('.secret-word');
+            secretWords.forEach(word => word.style.cursor = 'default');
+        }
+        
+        // Reiniciar la secuencia si es incorrecta o se interrumpe
+        if (loveClickSequence.length >= 2) {
+            loveClickSequence = [];
+        }
+    });
+
 
     // --- Control de la transición de bienvenida ---
     setTimeout(() => {
