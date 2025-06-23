@@ -18,7 +18,7 @@
             --glow-ciencia-ficcion: rgba(139, 92, 246, 0.5); /* Violet */
             --glow-fantasia: rgba(16, 185, 129, 0.5); /* Emerald */
             --glow-comics: rgba(239, 68, 68, 0.5); /* Red */
-            --glow-amor: rgba(251, 146, 60, 0.5); /* Orange for love */
+            --glow-amor: rgba(236, 72, 153, 0.5); /* Pink */
             --glow-default: rgba(255, 255, 255, 0.1);
         }
         body { font-family: 'Nunito', sans-serif; background-color: #000000; color: #E0E0E0; overflow-x: hidden; }
@@ -43,7 +43,6 @@
         .filter-btn.active { background-color: #2563EB; color: #FFFFFF; transform: scale(1.05); box-shadow: 0 0 15px rgba(37, 99, 235, 0.5); }
         .modal { transition: opacity 0.3s ease; }
         .modal-content { transition: transform 0.3s ease, opacity 0.3s ease; }
-        /* Estilo para las palabras secretas */
         .secret-word { cursor: pointer; transition: color 0.3s ease; }
         .secret-word:hover { color: #FBBF24; }
     </style>
@@ -82,7 +81,6 @@
             <div id="credits-text-content" class="text-gray-300 space-y-3">
                 <p>Diseñado y desarrollado por:</p>
                 <p class="font-bold text-xl text-blue-400">André Isaac Ruiz Ramírez y Nicole Jazlyn Reyes Rivera</p>
-                <!-- CAMBIO: Se envuelven las palabras secretas en spans -->
                 <p>Hecho con mucho <span id="word-cariño" class="secret-word">cariño</span> y <span id="word-amor" class="secret-word">amor</span>.</p>
             </div>
             <button id="close-credits-btn" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"><i class='bx bx-x text-3xl'></i></button>
@@ -118,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function animateParticles() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateParticles); }
     initParticles(); animateParticles();
     window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; initParticles(); });
+
 
     // --- DATOS DE LOS LIBROS ---
     const booksData = [
@@ -230,28 +229,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // CAMBIO: Lógica para el easter egg de Amor
     creditsTextContent.addEventListener('click', (event) => {
         if (loveEasterEggUnlocked || !event.target.matches('.secret-word')) return;
         
         loveClickSequence.push(event.target.id);
         
-        // Si se hace clic en la secuencia correcta
         if (loveClickSequence.join(',') === 'word-cariño,word-amor') {
             loveEasterEggUnlocked = true;
             const loveButton = document.createElement('button');
-            loveButton.className = "filter-btn fade-in-item bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-5 rounded-full";
+            loveButton.className = "filter-btn fade-in-item bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-5 rounded-full";
             loveButton.dataset.filter = "amor";
             loveButton.textContent = "Amor";
             filterContainer.appendChild(loveButton);
             setTimeout(() => loveButton.classList.add('is-visible'), 50);
 
-            // Una vez desbloqueado, ya no se puede volver a activar
             const secretWords = document.querySelectorAll('.secret-word');
             secretWords.forEach(word => word.style.cursor = 'default');
         }
         
-        // Reiniciar la secuencia si es incorrecta o se interrumpe
         if (loveClickSequence.length >= 2) {
             loveClickSequence = [];
         }
