@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Virtual de la Mixta 65</title>
+    <!-- Importamos Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Se importa la nueva fuente 'Nunito' -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Iconos para los botones -->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --glow-clasico: rgba(236, 72, 153, 0.5); /* Pink */
+            --glow-ciencia-ficcion: rgba(139, 92, 246, 0.5); /* Violet */
+            --glow-fantasia: rgba(16, 185, 129, 0.5); /* Emerald */
+            --glow-comics: rgba(239, 68, 68, 0.5); /* Red */
+            --glow-default: rgba(255, 255, 255, 0.1);
+        }
+        body { font-family: 'Nunito', sans-serif; background-color: #000000; color: #E0E0E0; overflow-x: hidden; }
+        #dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        #header-container { display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; transition: height 0.8s ease-in-out, padding 0.8s ease-in-out; cursor: pointer; }
+        
+        .animated-title span { opacity: 0; transform: translateY(30px); display: inline-block; animation: fadeInUp 0.8s ease forwards; margin: 0 0.2em; }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        
+        .fade-in-item { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .fade-in-item.is-visible { opacity: 1; transform: translateY(0); }
+        .book-card { transition: all 0.3s ease; cursor: pointer; }
+        .book-card:hover { transform: translateY(-8px) scale(1.03); box-shadow: 0 0 25px var(--glow-color, var(--glow-default)), 0 0 10px var(--glow-color, var(--glow-default)); }
+        .book-card[data-category="clasico"] { --glow-color: var(--glow-clasico); }
+        .book-card[data-category="ciencia-ficcion"] { --glow-color: var(--glow-ciencia-ficcion); }
+        .book-card[data-category="fantasia"] { --glow-color: var(--glow-fantasia); }
+        .book-card[data-category="comics"] { --glow-color: var(--glow-comics); }
+        .hidden-item { opacity: 0; pointer-events: none; }
+        .visible-item { opacity: 1; pointer-events: auto; }
+        .filter-btn { transition: all 0.3s ease; }
+        .filter-btn.active { background-color: #2563EB; color: #FFFFFF; transform: scale(1.05); box-shadow: 0 0 15px rgba(37, 99, 235, 0.5); }
+        .modal { transition: opacity 0.3s ease; }
+        .modal-content { transition: transform 0.3s ease, opacity 0.3s ease; }
+    </style>
+</head>
+<body class="bg-black">
+    
+    <canvas id="dynamic-bg"></canvas>
+
+    <header id="header-container">
+        <h1 class="animated-title text-4xl md:text-6xl font-black text-gray-200">
+            <span style="animation-delay: 0.2s;">Biblioteca</span><span style="animation-delay: 0.4s;">Virtual</span><span style="animation-delay: 0.6s;">de</span><span style="animation-delay: 0.8s;">la</span><span style="animation-delay: 1.0s;">Mixta</span><span style="animation-delay: 1.2s;">65</span>
+        </h1>
+    </header>
+
+    <div id="library-content" class="container mx-auto px-6 pb-24 hidden-item" style="transition: opacity 0.8s ease-in-out;">
+        <div id="filter-container" class="flex flex-wrap justify-center gap-3 mb-12">
+            <button class="filter-btn fade-in-item bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold py-2 px-5 rounded-full" data-filter="all">Todos</button>
+            <button class="filter-btn fade-in-item bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold py-2 px-5 rounded-full" data-filter="clasico">Clásicos</button>
+            <button class="filter-btn fade-in-item bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold py-2 px-5 rounded-full" data-filter="ciencia-ficcion">Ciencia Ficción</button>
+            <button class="filter-btn fade-in-item bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold py-2 px-5 rounded-full" data-filter="fantasia">Fantasía</button>
+            <!-- El botón de Cómics se añadirá aquí dinámicamente -->
+        </div>
+        <main id="book-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+            <!-- Los libros se insertarán aquí -->
+        </main>
+    </div>
+
+    <button id="credits-btn" class="hidden-item fixed bottom-6 right-6 bg-gray-800/50 backdrop-blur-sm text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:scale-110 hover:bg-blue-500/50 transition-all duration-300 z-50">
+        <i class='bx bx-info-circle text-2xl'></i>
+    </button>
+    
+    <!-- Modal de Créditos -->
+    <div id="credits-modal" class="modal hidden-item fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="modal-content scale-95 bg-gray-900/80 border border-gray-700 rounded-2xl shadow-2xl p-8 w-full max-w-md text-center">
+            <h2 id="credits-title" class="text-3xl font-bold text-white mb-4">Créditos</h2>
+            <div id="credits-text-content" class="text-gray-300 space-y-3">
+                <p>Diseñado y desarrollado por:</p>
+                <p class="font-bold text-xl text-blue-400">[Tu Nombre o Nombre del Equipo]</p>
+                <p>Con la asistencia de IA por Gemini.</p>
+                <p class="text-xs text-gray-500 mt-6">&copy; 2025 - Todos los derechos reservados.</p>
+            </div>
+            <button id="close-credits-btn" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"><i class='bx bx-x text-3xl'></i></button>
+        </div>
+    </div>
+    
+    <!-- Modal de Detalles del Libro -->
+    <div id="book-details-modal" class="modal hidden-item fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div id="book-modal-content" class="modal-content scale-95 opacity-0 bg-gray-900/80 border border-gray-700 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row overflow-hidden">
+            <img id="modal-book-img" src="" alt="Portada del libro" class="w-full md:w-1/3 h-64 md:h-auto object-cover">
+            <div class="p-8 flex flex-col overflow-y-auto">
+                <h2 id="modal-book-title" class="text-3xl font-bold text-white mb-2"></h2>
+                <p id="modal-book-author" class="text-lg text-gray-400 mb-6"></p>
+                <h3 class="text-xl font-bold text-white mb-3">Sinopsis</h3>
+                <p id="modal-book-synopsis" class="text-gray-300 leading-relaxed mb-8 flex-grow"></p>
+                <a id="modal-read-btn" href="#" target="_blank" class="mt-auto text-center bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300">
+                    Leer Libro <i class='bx bx-book-reader ml-2'></i>
+                </a>
+            </div>
+            <button id="close-book-modal-btn" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"><i class='bx bx-x text-3xl'></i></button>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Configuración del Fondo Dinámico ---
+    const canvas = document.getElementById('dynamic-bg');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    let particles = []; const particleCount = 100;
+    class Particle { constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 1.5 + 0.5; this.speedX = Math.random() * 0.4 - 0.2; this.speedY = Math.random() * 0.4 - 0.2; this.opacity = Math.random() * 0.5 + 0.2; } update() { this.x += this.speedX; this.y += this.speedY; if (this.x < 0 || this.x > canvas.width) this.speedX *= -1; if (this.y < 0 || this.y > canvas.height) this.speedY *= -1; } draw() { ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); } }
+    function initParticles() { for (let i = 0; i < particleCount; i++) particles.push(new Particle()); }
+    function animateParticles() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateParticles); }
+    initParticles(); animateParticles();
+    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; initParticles(); });
+
+    // --- DATOS DE LOS LIBROS ---
+    const booksData = [
+        { href: "#", category: "clasico", img: "images/DonQuijoteDelamancha.png", title: "Don Quijote de la Mancha", author: "Miguel de Cervantes", synopsis: "Las aventuras de un hidalgo de La Mancha que, tras leer demasiados libros de caballerías, decide convertirse en un caballero andante para deshacer entuertos y buscar su propia gloria." },
+        { href: "#", category: "ciencia-ficcion", img: "https://placehold.co/400x600/8B5CF6/FFFFFF?text=1984", title: "1984", author: "George Orwell", synopsis: "En un futuro distópico, el estado totalitario controla cada aspecto de la vida. Winston Smith, un trabajador desilusionado, comienza a cuestionar el sistema y al omnipresente Gran Hermano." },
+        { href: "#", category: "fantasia", img: "https://placehold.co/400x600/10B981/FFFFFF?text=El+Alquimista", title: "El Alquimista", author: "Paulo Coelho", synopsis: "Un joven pastor andaluz llamado Santiago emprende un viaje en busca de un tesoro, descubriendo en el camino la importancia de seguir sus sueños y escuchar a su corazón." },
+        { href: "#", category: "clasico", img: "https://placehold.co/400x600/EC4899/FFFFFF?text=El+Arte+de+la+Guerra", title: "El Arte de la Guerra", author: "Sun Tzu", synopsis: "Un antiguo tratado militar chino que ofrece estrategias y tácticas sobre cómo afrontar conflictos y ganar batallas, aplicable no solo a la guerra, sino también a los negocios y la vida cotidiana." },
+        { href: "#", category: "fantasia", img: "https://placehold.co/400x600/10B981/FFFFFF?text=El+Hobbit", title: "El Hobbit", author: "J.R.R. Tolkien", synopsis: "Bilbo Bolsón, un hobbit amante de la comodidad, es arrastrado a una aventura inesperada con un grupo de enanos para recuperar un tesoro robado por el dragón Smaug." },
+        { href: "#", category: "ciencia-ficcion", img: "https://placehold.co/400x600/8B5CF6/FFFFFF?text=Dune", title: "Dune", author: "Frank Herbert", synopsis: "En el desértico planeta Arrakis, el joven Paul Atreides debe navegar intrigas políticas, religiosas y ecológicas para proteger el recurso más valioso del universo: la especia melange." },
+        { href: "#", category: "comics", img: "https://placehold.co/400x600/EF4444/FFFFFF?text=Watchmen", title: "Watchmen", author: "Alan Moore", synopsis: "Una deconstrucción del género de superhéroes que explora las complejidades morales de un grupo de justicieros retirados en una historia alternativa durante la Guerra Fría." },
+        { href: "#", category: "comics", img: "https://placehold.co/400x600/EF4444/FFFFFF?text=The+Sandman", title: "The Sandman", author: "Neil Gaiman", synopsis: "Sueño, el rey de las historias, es capturado y debe viajar a través de diferentes reinos para recuperar sus artefactos perdidos y restaurar su poder." }
+    ];
+
+    const headerContainer = document.getElementById('header-container');
+    const libraryContent = document.getElementById('library-content');
+    const bookGrid = document.getElementById('book-grid');
+    const filterContainer = document.getElementById('filter-container');
+    
+    // CAMBIO: Lógica de renderizado simplificada
+    function renderBooks(filter = 'all') {
+        bookGrid.innerHTML = '';
+        let booksToRender;
+
+        if (filter === 'all') {
+            // Si 'Todos' está seleccionado, muestra todos los libros excepto los cómics, a menos que estén desbloqueados.
+            booksToRender = easterEggUnlocked 
+                ? booksData 
+                : booksData.filter(book => book.category !== 'comics');
+        } else {
+            // Si se selecciona una categoría específica, muestra solo los libros de esa categoría.
+            booksToRender = booksData.filter(book => book.category === filter);
+        }
+
+        booksToRender.forEach((book, index) => {
+            const bookElement = document.createElement('div');
+            bookElement.className = `book-card fade-in-item bg-gray-900 rounded-xl overflow-hidden block transition-all duration-300 ease-in-out group`;
+            bookElement.setAttribute('data-category', book.category);
+            Object.keys(book).forEach(key => { bookElement.dataset[key] = book[key]; });
+            bookElement.innerHTML = `<img src="${book.img}" alt="Portada de ${book.title}" class="w-full h-auto object-cover"><div class="p-4"><h3 class="font-bold text-lg text-white truncate transition-colors duration-300 group-hover:text-white">${book.title}</h3><p class="text-sm text-gray-400">${book.author}</p></div>`;
+            bookGrid.appendChild(bookElement);
+            setTimeout(() => bookElement.classList.add('is-visible'), 100 * index);
+        });
+    }
+
+    // --- Lógica de Modales ---
+    const creditsBtn = document.getElementById('credits-btn');
+    const creditsModal = document.getElementById('credits-modal');
+    const creditsTextContent = document.getElementById('credits-text-content');
+    const closeCreditsBtn = document.getElementById('close-credits-btn');
+    const bookDetailsModal = document.getElementById('book-details-modal');
+    const closeBookModalBtn = document.getElementById('close-book-modal-btn');
+    
+    function openModal(modal) { /* ... (código sin cambios) ... */ modal.classList.remove('hidden-item'); modal.classList.add('visible-item'); setTimeout(() => { modal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0'); }, 10); }
+    function closeModal(modal) { /* ... (código sin cambios) ... */ modal.querySelector('.modal-content').classList.add('scale-95', 'opacity-0'); setTimeout(() => { modal.classList.add('hidden-item'); modal.classList.remove('visible-item'); }, 300); }
+    
+    closeCreditsBtn.addEventListener('click', () => closeModal(creditsModal));
+    creditsModal.addEventListener('click', e => e.target === creditsModal && closeModal(creditsModal));
+    closeBookModalBtn.addEventListener('click', () => closeModal(bookDetailsModal));
+    bookDetailsModal.addEventListener('click', e => e.target === bookDetailsModal && closeModal(bookDetailsModal));
+    
+    bookGrid.addEventListener('click', (event) => { /* ... (código sin cambios) ... */ const card = event.target.closest('.book-card'); if (!card) return; const data = card.dataset; document.getElementById('modal-book-img').src = data.img; document.getElementById('modal-book-title').textContent = data.title; document.getElementById('modal-book-author').textContent = data.author; document.getElementById('modal-book-synopsis').textContent = data.synopsis; document.getElementById('modal-read-btn').href = data.href; openModal(bookDetailsModal); });
+
+    // --- LÓGICA DE EASTER EGGS ---
+    let creditsClickCount = 0;
+    let titleClickCount = 0;
+    let easterEggUnlocked = false;
+    const originalCreditsHTML = creditsTextContent.innerHTML;
+
+    creditsBtn.addEventListener('click', () => {
+        // CAMBIO: La lógica del easter egg solo se ejecuta si la categoría NO ha sido desbloqueada.
+        if (!easterEggUnlocked) {
+            creditsClickCount++;
+            if (creditsClickCount === 3) {
+                creditsTextContent.innerHTML = `<p class="font-bold text-xl text-amber-400">Deberías clickear 10 veces el título 👀</p>`;
+            } else {
+                creditsTextContent.innerHTML = originalCreditsHTML;
+                if (creditsClickCount > 3) {
+                    creditsClickCount = 0;
+                }
+            }
+        } else {
+            // Si ya está desbloqueado, siempre muestra el contenido original.
+            creditsTextContent.innerHTML = originalCreditsHTML;
+        }
+        openModal(creditsModal);
+    });
+
+    headerContainer.addEventListener('click', () => {
+        if (easterEggUnlocked) return;
+        titleClickCount++;
+        if (titleClickCount >= 10) {
+            easterEggUnlocked = true;
+            const comicsButton = document.createElement('button');
+            comicsButton.className = "filter-btn fade-in-item bg-red-800 hover:bg-red-700 text-gray-300 font-bold py-2 px-5 rounded-full";
+            comicsButton.dataset.filter = "comics";
+            comicsButton.textContent = "Cómics";
+            filterContainer.appendChild(comicsButton);
+            setTimeout(() => comicsButton.classList.add('is-visible'), 50);
+        }
+    });
+
+    // --- Control de la transición de bienvenida ---
+    setTimeout(() => {
+        headerContainer.style.height = 'auto';
+        headerContainer.style.padding = '3rem 0';
+        libraryContent.classList.remove('hidden-item');
+        creditsBtn.classList.remove('hidden-item');
+        creditsBtn.classList.add('visible-item');
+        document.querySelectorAll('#filter-container .fade-in-item').forEach((item, index) => {
+            setTimeout(() => item.classList.add('is-visible'), 150 * index);
+        });
+        renderBooks();
+    }, 2500);
+
+    // --- Lógica de filtros (con delegación de eventos) ---
+    filterContainer.addEventListener('click', (event) => {
+        if (event.target.matches('.filter-btn')) {
+            const button = event.target;
+            const selectedFilter = button.dataset.filter;
+            filterContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            renderBooks(selectedFilter);
+        }
+    });
+    document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+});
+</script>
+</body>
+</html>
